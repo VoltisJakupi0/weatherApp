@@ -9,7 +9,11 @@ function AppNavigation() {
   return (
     <NavigationContainer>
       <Stack.Navigator>
-        <Stack.Screen name="Weather" component={WeatherScreen} />
+        <Stack.Screen
+          name="Weather"
+          options={{ headerShown: false }}
+          component={WeatherScreen}
+        />
         <Stack.Screen name="InfoWeather" component={InfoWeatherScreen} />
       </Stack.Navigator>
     </NavigationContainer>
