@@ -60,7 +60,7 @@ function InfoWeatherScreen({
             <TouchableOpacity onPress={handleFavorite}>
               <Image
                 source={require("../../assets/images/staricon.png")}
-                style={{ width: 30, height: 30 }}
+                style={{ width: 30, height: 30, tintColor: "white" }}
               />
             </TouchableOpacity>
           ) : (

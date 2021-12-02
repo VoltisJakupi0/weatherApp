@@ -1,5 +1,5 @@
 import React, { ReactElement, useState } from "react";
-import { View, StyleSheet, Text } from "react-native";
+import { View, StyleSheet, Text, ScrollView } from "react-native";
 import {
   NavigationParams,
   NavigationScreenProp,
@@ -53,7 +53,9 @@ function WeatherScreen({ navigation }: WeatherScreenProps): ReactElement {
 
       <View style={{ marginTop: 40 }} />
       <Text style={styles.favoriteCityText}>Your favorite cities</Text>
-      <List navigation={navigation} data={data} />
+      <ScrollView>
+        <List navigation={navigation} data={data} />
+      </ScrollView>
     </View>
   );
 }
@@ -66,7 +68,7 @@ const styles = StyleSheet.create({
   favoriteCityText: {
     fontSize: 18,
     fontWeight: "500",
-    marginLeft: 20,
+    marginLeft: 13,
     marginBottom: 8,
     color: "grey",
   },
