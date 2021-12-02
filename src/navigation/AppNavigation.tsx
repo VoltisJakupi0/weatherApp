@@ -14,7 +14,11 @@ function AppNavigation() {
           options={{ headerShown: false }}
           component={WeatherScreen}
         />
-        <Stack.Screen name="InfoWeather" component={InfoWeatherScreen} />
+        <Stack.Screen
+          name="InfoWeather"
+          options={{ headerShown: false }}
+          component={InfoWeatherScreen}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

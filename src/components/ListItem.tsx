@@ -8,22 +8,28 @@ import {
   StyleSheet,
 } from "react-native";
 
-export interface ListItemProps {
+export interface ListItemType {
   temperature: string;
   city: string;
   background: any;
+}
+
+export interface ListItemProps extends ListItemType {
+  onPress?: () => void;
 }
 
 function ListItem({
   temperature,
   city,
   background,
+  onPress,
 }: ListItemProps): ReactElement {
   return (
     <TouchableOpacity
       style={{
         height: 150,
       }}
+      onPress={onPress}
     >
       <ImageBackground
         style={styles.imageBackground}

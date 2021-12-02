@@ -1,13 +1,20 @@
 import React, { ReactElement } from "react";
-import ListItem, { ListItemProps } from "./ListItem";
+import {
+  NavigationParams,
+  NavigationScreenProp,
+  NavigationState,
+} from "react-navigation";
+import ListItem, { ListItemType } from "./ListItem";
 interface ListProps {
-  data: ListItemProps[];
+  data: ListItemType[];
+  navigation: NavigationScreenProp<NavigationState, NavigationParams>;
 }
 
-function List({ data }: ListProps): any {
-  return data.map((item: ListItemProps) => {
+function List({ data, navigation }: ListProps): any {
+  return data.map((item: ListItemType) => {
     return (
       <ListItem
+        onPress={() => navigation.navigate("InfoWeather")}
         background={item.background}
         city={item.city}
         temperature={item.temperature}

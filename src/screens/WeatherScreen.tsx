@@ -1,26 +1,19 @@
 import React, { ReactElement, useState } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ImageBackground,
-} from "react-native";
+import { View, StyleSheet, Text } from "react-native";
 import {
   NavigationParams,
   NavigationScreenProp,
   NavigationState,
 } from "react-navigation";
 import SearchInput from "../components/SearchInput";
-import moment from "moment";
-import { ListItemProps } from "../components/ListItem";
+import { ListItemType } from "../components/ListItem";
 import List from "../components/List";
 
 interface WeatherScreenProps {
   navigation: NavigationScreenProp<NavigationState, NavigationParams>;
 }
 
-const data: ListItemProps[] = [
+const data: ListItemType[] = [
   {
     temperature: "2°C",
     background: require("../../assets/images/rainy.jpeg"),
@@ -43,7 +36,7 @@ const data: ListItemProps[] = [
   },
 ];
 
-function WeatherScreen(props: WeatherScreenProps): ReactElement {
+function WeatherScreen({ navigation }: WeatherScreenProps): ReactElement {
   const [searchValue, setSearchValue] = useState<string>("");
 
   const handleChangeSearchValue = (value: string) => {
@@ -53,21 +46,29 @@ function WeatherScreen(props: WeatherScreenProps): ReactElement {
   return (
     <View style={styles.mainView}>
       <SearchInput
-        placeholder={"Search Country"}
+        placeholder={"Search City"}
         value={searchValue}
         onChangeText={(value: string) => handleChangeSearchValue(value)}
       />
 
-      <View style={{ marginTop: 10 }} />
-
-      <List data={data} />
+      <View style={{ marginTop: 40 }} />
+      <Text style={styles.favoriteCityText}>Your favorite cities</Text>
+      <List navigation={navigation} data={data} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   mainView: {
-    marginTop: 65,
+    paddingTop: 65,
+    backgroundColor: "white",
+  },
+  favoriteCityText: {
+    fontSize: 18,
+    fontWeight: "500",
+    marginLeft: 20,
+    marginBottom: 8,
+    color: "grey",
   },
 });
 
