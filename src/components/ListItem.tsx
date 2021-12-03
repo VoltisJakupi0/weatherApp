@@ -24,20 +24,16 @@ function ListItem({
   background,
   onPress,
 }: ListItemProps): ReactElement {
+  const now = moment().format("HH:mm");
   return (
-    <TouchableOpacity
-      style={{
-        height: 150,
-      }}
-      onPress={onPress}
-    >
+    <TouchableOpacity style={styles.mainButton} onPress={onPress}>
       <ImageBackground
         style={styles.imageBackground}
         resizeMode="stretch"
         source={background}
       >
         <View>
-          <Text style={styles.hourText}>{moment().format("HH:mm")}</Text>
+          <Text style={styles.hourText}>{now}</Text>
           <Text style={styles.cityText}>{city}</Text>
         </View>
         <View>
@@ -51,6 +47,9 @@ function ListItem({
 export default ListItem;
 
 const styles = StyleSheet.create({
+  mainButton: {
+    height: 150,
+  },
   imageBackground: {
     height: 150,
     opacity: 0.93,

@@ -36,7 +36,9 @@ const data: ListItemType[] = [
   },
 ];
 
-function WeatherScreen({ navigation }: WeatherScreenProps): ReactElement {
+function FavoriteCitiesWeatherScreen({
+  navigation,
+}: WeatherScreenProps): ReactElement {
   const [searchValue, setSearchValue] = useState<string>("");
 
   const handleChangeSearchValue = (value: string) => {
@@ -51,7 +53,7 @@ function WeatherScreen({ navigation }: WeatherScreenProps): ReactElement {
         onChangeText={(value: string) => handleChangeSearchValue(value)}
       />
 
-      <View style={{ marginTop: 40 }} />
+      <View style={styles.topMarginView} />
       <Text style={styles.favoriteCityText}>Your favorite cities</Text>
       <ScrollView>
         <List navigation={navigation} data={data} />
@@ -65,6 +67,7 @@ const styles = StyleSheet.create({
     paddingTop: 65,
     backgroundColor: "white",
   },
+  topMarginView: { marginTop: 40 },
   favoriteCityText: {
     fontSize: 18,
     fontWeight: "500",
@@ -74,4 +77,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default WeatherScreen;
+export default FavoriteCitiesWeatherScreen;

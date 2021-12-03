@@ -1,8 +1,9 @@
 import { createStackNavigator } from "@react-navigation/stack";
-import WeatherScreen from "../screens/WeatherScreen";
-import InfoWeatherScreen from "../screens/InfoWeatherScreen";
+import FavoriteCitiesWeatherScreen from "../screens/FavoriteCitiesWeatherScreen";
+import DetailCityWeatherScreen from "../screens/DetailCityWeatherScreen";
 import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
+
 const Stack = createStackNavigator();
 
 function AppNavigation() {
@@ -12,12 +13,12 @@ function AppNavigation() {
         <Stack.Screen
           name="Weather"
           options={{ headerShown: false }}
-          component={WeatherScreen}
+          component={FavoriteCitiesWeatherScreen}
         />
         <Stack.Screen
           name="InfoWeather"
           options={{ headerShown: false }}
-          component={InfoWeatherScreen}
+          component={DetailCityWeatherScreen}
         />
       </Stack.Navigator>
     </NavigationContainer>

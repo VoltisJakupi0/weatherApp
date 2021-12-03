@@ -15,13 +15,13 @@ function SearchInput({
   return (
     <View style={styles.mainView}>
       <TextInput
-        style={{ fontSize: 15 }}
+        style={styles.inputStyle}
         placeholder={placeholder}
         value={value}
         onChangeText={onChangeText}
       />
       <Image
-        style={{ width: 20, height: 20 }}
+        style={styles.searchImage}
         source={require("../../assets/images/search.png")}
       />
     </View>
@@ -49,6 +49,10 @@ const styles = StyleSheet.create({
     shadowRadius: 2.22,
     elevation: 3,
   },
+  inputStyle: {
+    fontSize: 15,
+  },
+  searchImage: { width: 20, height: 20 },
 });
 
 export default SearchInput;

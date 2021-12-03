@@ -26,8 +26,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     flexDirection: "row",
-    // borderTopWidth: 1,
-    // borderColor: "white",
     height: 40,
   },
   dayText: { color: "white", fontWeight: "600", fontSize: 18 },

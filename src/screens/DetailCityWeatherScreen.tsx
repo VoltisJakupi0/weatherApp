@@ -16,13 +16,13 @@ import {
 } from "react-navigation";
 import WeatherDailyInfoCard from "../components/WeatherDailyInfoCard";
 import WeatherWeekDayInfoCard from "../components/WeatherWeekDayInfoCard";
-interface InfoWeatherScreenProps {
+interface DetailCityWeatherScreenProps {
   navigation: NavigationScreenProp<NavigationState, NavigationParams>;
 }
 
-function InfoWeatherScreen({
+function DetailCityWeatherScreen({
   navigation,
-}: InfoWeatherScreenProps): ReactElement {
+}: DetailCityWeatherScreenProps): ReactElement {
   const [favorite, setFavorite] = useState<boolean>(false);
 
   const handleFavorite = () => {
@@ -36,60 +36,36 @@ function InfoWeatherScreen({
   return (
     <View>
       <ImageBackground
-        style={{ width: "100%", height: "100%", opacity: 0.9 }}
+        style={styles.imageWrapper}
         source={require("../../assets/images/rainyinfo.jpeg")}
       >
-        <View
-          style={{
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginLeft: 20,
-            marginRight: 20,
-            marginTop: 55,
-            flexDirection: "row",
-          }}
-        >
+        <View style={styles.headerView}>
           <TouchableOpacity onPress={handleBack}>
             <Image
               source={require("../../assets/images/leftarrow.png")}
-              style={{ width: 30, height: 30, tintColor: "white" }}
+              style={styles.leftArrowImage}
             />
           </TouchableOpacity>
 
-          {favorite ? (
-            <TouchableOpacity onPress={handleFavorite}>
-              <Image
-                source={require("../../assets/images/staricon.png")}
-                style={{ width: 30, height: 30, tintColor: "white" }}
-              />
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity onPress={handleFavorite}>
-              <Image
-                source={require("../../assets/images/starout.png")}
-                style={{ width: 30, height: 30, tintColor: "white" }}
-              />
-            </TouchableOpacity>
-          )}
+          <TouchableOpacity onPress={handleFavorite}>
+            <Image
+              source={
+                favorite
+                  ? require("../../assets/images/staricon.png")
+                  : require("../../assets/images/starout.png")
+              }
+              style={styles.starImage}
+            />
+          </TouchableOpacity>
         </View>
-        <View style={{ marginTop: 60, alignItems: "center" }}>
+        <View style={styles.headingInfoView}>
           <Text style={styles.cityText}>Prishtina</Text>
           <Text style={styles.weatherText}>Rainy</Text>
           <Text style={styles.temperatureText}>2°</Text>
           <Text style={styles.highLowInfo}>HIGH: 10° LOW: -1°</Text>
         </View>
 
-        <View
-          style={{
-            marginTop: 100,
-            paddingLeft: 10,
-            paddingRight: 10,
-            height: 100,
-            borderTopWidth: 1,
-            borderBottomWidth: 1,
-            borderColor: "white",
-          }}
-        >
+        <View style={styles.weatherDailyInfoCardsView}>
           <ScrollView horizontal>
             <WeatherDailyInfoCard day="Now" temperature="2°" />
             <WeatherDailyInfoCard day="4" temperature="12°" />
@@ -109,7 +85,7 @@ function InfoWeatherScreen({
           </ScrollView>
         </View>
 
-        <View style={{ marginTop: 20 }}>
+        <View style={styles.weatherWeekDayInfoCardsView}>
           <ScrollView>
             <WeatherWeekDayInfoCard day="Monday" temperature="2°" />
             <WeatherWeekDayInfoCard day="Tuesday" temperature="8°" />
@@ -143,6 +119,30 @@ const styles = StyleSheet.create({
     paddingTop: 5,
     fontWeight: "500",
   },
+  imageWrapper: { width: "100%", height: "100%", opacity: 0.9 },
+  headerView: {
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginLeft: 20,
+    marginRight: 20,
+    marginTop: 55,
+    flexDirection: "row",
+  },
+  leftArrowImage: { width: 30, height: 30, tintColor: "white" },
+  starImage: { width: 30, height: 30, tintColor: "white" },
+  headingInfoView: { marginTop: 60, alignItems: "center" },
+  weatherDailyInfoCardsView: {
+    marginTop: 100,
+    paddingLeft: 10,
+    paddingRight: 10,
+    height: 100,
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: "white",
+  },
+  weatherWeekDayInfoCardsView: {
+    marginTop: 20,
+  },
 });
 
-export default InfoWeatherScreen;
+export default DetailCityWeatherScreen;
