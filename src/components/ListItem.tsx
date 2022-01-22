@@ -1,11 +1,12 @@
 import moment from "moment";
-import React, { ReactElement } from "react";
+import React, { ReactElement, useRef, useEffect } from "react";
 import {
   TouchableOpacity,
   Text,
   View,
   ImageBackground,
   StyleSheet,
+  Animated,
 } from "react-native";
 
 export interface ListItemType {
@@ -24,23 +25,39 @@ function ListItem({
   background,
   onPress,
 }: ListItemProps): ReactElement {
+  const fadeAnim = useRef(new Animated.Value(0)).current;
   const now = moment().format("HH:mm");
+
+  useEffect(() => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 5000,
+      useNativeDriver: true,
+    }).start();
+  }, [fadeAnim]);
+
   return (
-    <TouchableOpacity style={styles.mainButton} onPress={onPress}>
-      <ImageBackground
-        style={styles.imageBackground}
-        resizeMode="stretch"
-        source={background}
-      >
-        <View>
-          <Text style={styles.hourText}>{now}</Text>
-          <Text style={styles.cityText}>{city}</Text>
-        </View>
-        <View>
-          <Text style={styles.temperatureText}>{temperature}</Text>
-        </View>
-      </ImageBackground>
-    </TouchableOpacity>
+    <Animated.View
+      style={{
+        opacity: fadeAnim,
+      }}
+    >
+      <TouchableOpacity style={styles.mainButton} onPress={onPress}>
+        <ImageBackground
+          style={styles.imageBackground}
+          resizeMode="stretch"
+          source={background}
+        >
+          <View>
+            <Text style={styles.hourText}>{now}</Text>
+            <Text style={styles.cityText}>{city}</Text>
+          </View>
+          <View>
+            <Text style={styles.temperatureText}>{temperature}°</Text>
+          </View>
+        </ImageBackground>
+      </TouchableOpacity>
+    </Animated.View>
   );
 }
 

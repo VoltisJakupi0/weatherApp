@@ -1,4 +1,4 @@
-import React, { ReactElement, useState } from "react";
+import React, { ReactElement, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -8,7 +8,7 @@ import {
   StyleSheet,
   ScrollView,
 } from "react-native";
-
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   NavigationParams,
   NavigationScreenProp,
@@ -16,16 +16,67 @@ import {
 } from "react-navigation";
 import WeatherDailyInfoCard from "../components/WeatherDailyInfoCard";
 import WeatherWeekDayInfoCard from "../components/WeatherWeekDayInfoCard";
+import moment from "moment";
+import { capitalize } from "../helpers/capitalize";
+
 interface DetailCityWeatherScreenProps {
   navigation: NavigationScreenProp<NavigationState, NavigationParams>;
+  route: any;
 }
 
 function DetailCityWeatherScreen({
   navigation,
+  route,
 }: DetailCityWeatherScreenProps): ReactElement {
   const [favorite, setFavorite] = useState<boolean>(false);
+  const [weatherDetails, setWeatherDetails] = useState<any>();
 
-  const handleFavorite = () => {
+  useEffect(() => {
+    if (route.params) {
+      setWeatherDetails(route.params?.weatherDetails);
+      setFavoriteByDefault();
+    }
+  }, [route.params, weatherDetails]);
+
+  const setFavoriteByDefault = async () => {
+    var favoriteCities: any = await AsyncStorage.getItem("favoriteCities");
+
+    const isFavorite =
+      JSON.parse(favoriteCities).findIndex(
+        (item: any) => item.timezone == weatherDetails?.timezone
+      ) == -1
+        ? false
+        : true;
+
+    if (isFavorite) {
+      setFavorite(true);
+    }
+
+    console.log(isFavorite);
+  };
+
+  const handleFavorite = async () => {
+    var favoriteCities: any = await AsyncStorage.getItem("favoriteCities");
+    if (favoriteCities == undefined) {
+      var favoriteCities: any = await AsyncStorage.setItem(
+        "favoriteCities",
+        JSON.stringify([])
+      );
+    }
+
+    var arr = JSON.parse(favoriteCities);
+
+    if (favorite) {
+      const result = arr?.filter(
+        (x: any) => x.timezone !== weatherDetails.timezone
+      );
+
+      await AsyncStorage.setItem("favoriteCities", JSON.stringify(result));
+    } else {
+      arr.push(weatherDetails);
+      await AsyncStorage.setItem("favoriteCities", JSON.stringify(arr));
+    }
+
     setFavorite(!favorite);
   };
 
@@ -59,39 +110,44 @@ function DetailCityWeatherScreen({
           </TouchableOpacity>
         </View>
         <View style={styles.headingInfoView}>
-          <Text style={styles.cityText}>Prishtina</Text>
-          <Text style={styles.weatherText}>Rainy</Text>
-          <Text style={styles.temperatureText}>2°</Text>
-          <Text style={styles.highLowInfo}>HIGH: 10° LOW: -1°</Text>
+          <Text style={styles.cityText}>
+            {weatherDetails?.timezone.split("/")[1]}
+          </Text>
+          <Text style={styles.weatherText}>
+            {capitalize(weatherDetails?.current?.weather[0].description)}
+          </Text>
+          <Text style={styles.temperatureText}>
+            {Math.round(weatherDetails?.current?.temp)}°
+          </Text>
+          <Text style={styles.highLowInfo}>
+            HIGH: {Math.round(weatherDetails?.daily[0]?.temp?.max)}° LOW:{" "}
+            {Math.round(weatherDetails?.daily[0]?.temp?.min)}°
+          </Text>
         </View>
 
         <View style={styles.weatherDailyInfoCardsView}>
           <ScrollView horizontal>
-            <WeatherDailyInfoCard day="Now" temperature="2°" />
-            <WeatherDailyInfoCard day="4" temperature="12°" />
-            <WeatherDailyInfoCard day="5" temperature="10°" />
-            <WeatherDailyInfoCard day="6" temperature="9°" />
-            <WeatherDailyInfoCard day="7" temperature="12°" />
-            <WeatherDailyInfoCard day="8" temperature="13°" />
-            <WeatherDailyInfoCard day="9" temperature="7°" />
-            <WeatherDailyInfoCard day="10" temperature="8°" />
-            <WeatherDailyInfoCard day="11" temperature="5°" />
-            <WeatherDailyInfoCard day="12" temperature="5°" />
-            <WeatherDailyInfoCard day="13" temperature="8°" />
-            <WeatherDailyInfoCard day="14" temperature="3°" />
-            <WeatherDailyInfoCard day="15" temperature="3°" />
-            <WeatherDailyInfoCard day="16" temperature="4°" />
-            <WeatherDailyInfoCard day="17" temperature="5°" />
+            {weatherDetails?.daily?.map((item: any, key: any) => {
+              return (
+                <WeatherDailyInfoCard
+                  day={key == 0 ? "Cur" : moment().add(key, "day").format("DD")}
+                  temperature={Math.round(item?.temp?.day) + "°"}
+                />
+              );
+            })}
           </ScrollView>
         </View>
 
         <View style={styles.weatherWeekDayInfoCardsView}>
-          <ScrollView>
-            <WeatherWeekDayInfoCard day="Monday" temperature="2°" />
-            <WeatherWeekDayInfoCard day="Tuesday" temperature="8°" />
-            <WeatherWeekDayInfoCard day="Wednseday" temperature="7°" />
-            <WeatherWeekDayInfoCard day="Thursday" temperature="3°" />
-            <WeatherWeekDayInfoCard day="Friday" temperature="2°" />
+          <ScrollView style={{ marginBottom: 100 }}>
+            {weatherDetails?.daily?.map((item: any, key: any) => {
+              return (
+                <WeatherWeekDayInfoCard
+                  day={moment().add(key, "day").format("dddd")}
+                  temperature={Math.round(item?.temp?.day) + "°"}
+                />
+              );
+            })}
           </ScrollView>
         </View>
       </ImageBackground>
@@ -142,6 +198,7 @@ const styles = StyleSheet.create({
   },
   weatherWeekDayInfoCardsView: {
     marginTop: 20,
+    height: 300,
   },
 });
 

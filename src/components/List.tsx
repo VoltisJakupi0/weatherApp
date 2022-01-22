@@ -7,19 +7,21 @@ import {
 import ListItem, { ListItemType } from "./ListItem";
 import { View } from "react-native";
 interface ListProps {
-  data: ListItemType[];
+  data: ListItemType[] | any;
   navigation: NavigationScreenProp<NavigationState, NavigationParams>;
 }
 
 function List({ data, navigation }: ListProps): any {
-  return data.map((item: ListItemType, key: number) => {
+  return data?.map((item: any, key: number) => {
     return (
       <View key={key}>
         <ListItem
-          onPress={() => navigation.navigate("InfoWeather")}
-          background={item.background}
-          city={item.city}
-          temperature={item.temperature}
+          onPress={() =>
+            navigation.navigate("InfoWeather", { weatherDetails: item })
+          }
+          background={require("../../assets/images/sunnyday.jpeg")}
+          city={item?.timezone.split("/")[1]}
+          temperature={Math.round(item.current?.temp).toString()}
         />
       </View>
     );
