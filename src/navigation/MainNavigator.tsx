@@ -1,28 +1,26 @@
 import { createStackNavigator } from "@react-navigation/stack";
-import FavoriteCitiesWeatherScreen from "../screens/FavoriteCitiesWeatherScreen";
-import DetailCityWeatherScreen from "../screens/DetailCityWeatherScreen";
-import React from "react";
+import * as React from "react";
 import { NavigationContainer } from "@react-navigation/native";
+import BottomTabNavigator from "./BottomTabNavigator";
+import DetailCityWeatherScreen from "../screens/DetailCityWeatherScreen";
 
 const Stack = createStackNavigator();
 
-function AppNavigation() {
+export default function MainNavigator() {
   return (
-    <NavigationContainer>
+    <NavigationContainer independent={true}>
       <Stack.Navigator>
         <Stack.Screen
-          name="Weather"
           options={{ headerShown: false }}
-          component={FavoriteCitiesWeatherScreen}
+          name="FavoriteCitiesTab"
+          component={BottomTabNavigator}
         />
         <Stack.Screen
-          name="InfoWeather"
           options={{ headerShown: false }}
+          name="InfoWeather"
           component={DetailCityWeatherScreen}
         />
       </Stack.Navigator>
     </NavigationContainer>
   );
 }
-
-export default AppNavigation;

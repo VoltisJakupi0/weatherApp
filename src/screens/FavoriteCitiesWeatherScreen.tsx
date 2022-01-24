@@ -1,20 +1,31 @@
-import React, { ReactElement, useEffect, useState } from "react";
-import { View, StyleSheet, Text, ScrollView, Alert } from "react-native";
+import React, { ReactElement, useContext, useEffect, useState } from "react";
+import {
+  View,
+  StyleSheet,
+  Text,
+  ScrollView,
+  Alert,
+  Image,
+  Platform,
+} from "react-native";
 import {
   NavigationParams,
   NavigationScreenProp,
   NavigationState,
 } from "react-navigation";
-import { ListItemType } from "../components/ListItem";
 import List from "../components/List";
-import axios from "axios";
-import { APIkey } from "../constants/apiKey";
+import { geoApiKey } from "../constants/apiKey";
 import GeoDBCitiesSearch from "react-native-geodb";
 import * as Location from "expo-location";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useDispatch, useSelector } from "react-redux";
+import { ReducerTypes } from "../reducers";
+import { getWeatherInformationForCity } from "../actions/weather-actions";
+import { WeatherContext } from "../context";
 
 interface WeatherScreenProps {
   navigation: NavigationScreenProp<NavigationState, NavigationParams>;
+  route: any;
 }
 
 // const data: ListItemType[] = [
@@ -42,51 +53,95 @@ interface WeatherScreenProps {
 
 function FavoriteCitiesWeatherScreen({
   navigation,
+  route,
 }: WeatherScreenProps): ReactElement {
+  const weather = useSelector((state: ReducerTypes) => state.weather);
+  const dispatch = useDispatch();
   const [location, setLocation] = useState<any>();
   const [favoriteCities, setFavoriteCities] = useState<any>([]);
+  const [, setCity] = useContext<any>(WeatherContext);
+
   useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        Alert.alert("Permission to access location was denied", "", []);
-        return;
-      }
-
-      let location = await Location.getCurrentPositionAsync({});
-
-      setLocation(location);
-    })();
+    getUserLocation();
     getFavoriteCities();
-  }, []);
+  }, [route.params]);
+
+  const getUserLocation = async () => {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permission to access location was denied", "", []);
+      return;
+    }
+    let locationPosition = await Location.getCurrentPositionAsync({});
+
+    let address = await Location.reverseGeocodeAsync({
+      latitude: locationPosition.coords.latitude,
+      longitude: locationPosition.coords.longitude,
+    });
+
+    var city = address[0]?.city;
+
+    setCity(city);
+
+    const isYourLocationInFavorite = favoriteCities?.findIndex(
+      (item: any) => item.city == city
+    );
+
+    if (isYourLocationInFavorite) {
+      return;
+    } else {
+      Alert.alert("Do you wanna see the weather for your location?", "", [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "OK",
+          onPress: () =>
+            getWeatherInformationForCity(
+              locationPosition.coords.latitude.toString(),
+              locationPosition.coords.longitude.toString()
+            ),
+        },
+      ]);
+      setLocation(location);
+    }
+  };
 
   const getFavoriteCities = async () => {
     const favoriteCities: any = await AsyncStorage.getItem("favoriteCities");
-
     setFavoriteCities(JSON.parse(favoriteCities));
   };
 
-  const getWeatherInformationForCity = (lat: string, lon: string) => {
-    axios
-      .get(
-        `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&units=metric&exclude=minutely,hourly,alerts&appid=${APIkey}`
-      )
-      .then((json) => {
-        navigation.navigate("InfoWeather", { weatherDetails: json.data });
+  const getWeatherInformation = async (lat: string, lon: string) => {
+    dispatch(getWeatherInformationForCity(lat, lon));
+    if (weather?.current) {
+      let address = await Location.reverseGeocodeAsync({
+        latitude: parseFloat(lat),
+        longitude: parseFloat(lon),
       });
+      weather.city = address[0]?.city;
+      setCity(weather.city);
+      navigation.navigate("InfoWeather", { weatherDetails: weather });
+    }
   };
 
   return (
     <View style={styles.mainView}>
-      <ScrollView contentContainerStyle={{ backgroundColor: "red" }}>
+      <View style={styles.platformView}>
+        <Text style={styles.platformText}>
+          {Platform.OS == "ios" ? "running in ios" : "running in android"}
+        </Text>
+      </View>
+      <ScrollView>
         <GeoDBCitiesSearch
           placeholder="Search cities"
           onSelectItem={(data: any) =>
-            getWeatherInformationForCity(data.latitude, data.longitude)
+            getWeatherInformation(data.latitude, data.longitude)
           }
           hidePoweredBy={true}
           query={{
-            key: "17e8938b1cmsh1ae9f6891830f33p14f194jsn27a9154bc6d0",
+            key: geoApiKey,
             api: "geo",
             types: "cities",
           }}
@@ -111,8 +166,12 @@ function FavoriteCitiesWeatherScreen({
           </ScrollView>
         </>
       ) : (
-        <View style={styles.centerView}>
-          <Text>No favorites cities yet...</Text>
+        <View style={styles.emptyView}>
+          <Image
+            style={styles.emptyImage}
+            source={require("../../assets/images/clock.png")}
+          />
+          <Text style={styles.emptyText}>No favorites cities yet...</Text>
         </View>
       )}
     </View>
@@ -128,17 +187,27 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "500",
     marginLeft: 13,
-    // marginTop: 40,
     marginBottom: 8,
     color: "grey",
   },
   contentContainerInput: {
     paddingLeft: 10,
     paddingRight: 10,
+    backgroundColor: "#f2f2f2",
   },
-  centerView: {
+  emptyView: {
+    marginTop: 200,
     alignItems: "center",
-    justifyContent: "center",
+  },
+  emptyImage: {
+    width: 100,
+    height: 100,
+  },
+  emptyText: {
+    paddingTop: 10,
+    fontSize: 16,
+    fontWeight: "500",
+    color: "grey",
   },
   searchInput: {
     backgroundColor: "white",
@@ -158,6 +227,15 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.22,
     shadowRadius: 2.22,
     elevation: 3,
+  },
+  platformView: {
+    alignItems: "flex-end",
+    justifyContent: "space-between",
+  },
+  platformText: {
+    fontSize: 10,
+    paddingRight: 10,
+    color: "grey",
   },
 });
 

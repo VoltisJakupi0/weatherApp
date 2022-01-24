@@ -1,4 +1,4 @@
-import React, { ReactElement, useEffect, useState } from "react";
+import React, { ReactElement, useContext, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -18,6 +18,7 @@ import WeatherDailyInfoCard from "../components/WeatherDailyInfoCard";
 import WeatherWeekDayInfoCard from "../components/WeatherWeekDayInfoCard";
 import moment from "moment";
 import { capitalize } from "../helpers/capitalize";
+import { WeatherContext } from "../context";
 
 interface DetailCityWeatherScreenProps {
   navigation: NavigationScreenProp<NavigationState, NavigationParams>;
@@ -30,6 +31,7 @@ function DetailCityWeatherScreen({
 }: DetailCityWeatherScreenProps): ReactElement {
   const [favorite, setFavorite] = useState<boolean>(false);
   const [weatherDetails, setWeatherDetails] = useState<any>();
+  const [city] = useContext<any>(WeatherContext);
 
   useEffect(() => {
     if (route.params) {
@@ -43,7 +45,7 @@ function DetailCityWeatherScreen({
 
     const isFavorite =
       JSON.parse(favoriteCities).findIndex(
-        (item: any) => item.timezone == weatherDetails?.timezone
+        (item: any) => item.city == weatherDetails?.city
       ) == -1
         ? false
         : true;
@@ -51,8 +53,6 @@ function DetailCityWeatherScreen({
     if (isFavorite) {
       setFavorite(true);
     }
-
-    console.log(isFavorite);
   };
 
   const handleFavorite = async () => {
@@ -67,9 +67,7 @@ function DetailCityWeatherScreen({
     var arr = JSON.parse(favoriteCities);
 
     if (favorite) {
-      const result = arr?.filter(
-        (x: any) => x.timezone !== weatherDetails.timezone
-      );
+      const result = arr?.filter((x: any) => x.city !== weatherDetails.city);
 
       await AsyncStorage.setItem("favoriteCities", JSON.stringify(result));
     } else {
@@ -81,7 +79,7 @@ function DetailCityWeatherScreen({
   };
 
   const handleBack = () => {
-    navigation.goBack();
+    navigation.navigate("FavoriteCitiesTab", { render: true });
   };
 
   return (
@@ -110,9 +108,7 @@ function DetailCityWeatherScreen({
           </TouchableOpacity>
         </View>
         <View style={styles.headingInfoView}>
-          <Text style={styles.cityText}>
-            {weatherDetails?.timezone.split("/")[1]}
-          </Text>
+          <Text style={styles.cityText}>{city}</Text>
           <Text style={styles.weatherText}>
             {capitalize(weatherDetails?.current?.weather[0].description)}
           </Text>
