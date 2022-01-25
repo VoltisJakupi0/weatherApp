@@ -13,7 +13,7 @@ interface ListProps {
 }
 
 function List({ data, navigation }: ListProps): any {
-  const [, setCity] = useContext<any>(WeatherContext);
+  const [, setShowSwiper] = useContext<any>(WeatherContext);
   return data?.map((item: any, key: number) => {
     const mainWeather = item?.current?.weather[0]?.main;
     const backgroundImage =
@@ -30,7 +30,7 @@ function List({ data, navigation }: ListProps): any {
       <View key={key}>
         <ListItem
           onPress={() => {
-            setCity(item?.city);
+            setShowSwiper(true);
             navigation.navigate("InfoWeather", { weatherDetails: item });
           }}
           background={backgroundImage}

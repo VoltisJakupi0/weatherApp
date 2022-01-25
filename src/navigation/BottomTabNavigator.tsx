@@ -32,8 +32,9 @@ export default function BottomTabNavigator({ navigation, route }: any) {
         options={{
           title: "Information",
           headerShown: false,
+          tabBarActiveTintColor: "#A4DAFF",
           tabBarIcon: ({ focused }) => (
-            <TabBarIcon focused={focused} name="md-settings" />
+            <TabBarIcon focused={focused} name="md-information" />
           ),
         }}
       />

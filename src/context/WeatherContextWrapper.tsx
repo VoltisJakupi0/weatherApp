@@ -2,10 +2,10 @@ import React, { useState } from "react";
 import { WeatherContext } from ".";
 
 export default function WeatherContextWrapper({ children }: any) {
-  const [city, setCity] = useState<string>("");
+  const [showSwiper, setShowSwiper] = useState<boolean>(false);
 
   return (
-    <WeatherContext.Provider value={[city, setCity]}>
+    <WeatherContext.Provider value={[showSwiper, setShowSwiper]}>
       {children}
     </WeatherContext.Provider>
   );

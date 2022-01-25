@@ -3,21 +3,19 @@ import { Text, View } from "react-native";
 import Swiper from "react-native-swiper";
 
 function CourseSwiper({
-  courseSlide,
   onIndexChange,
   tab,
   numberOfSlides,
   children,
 }: React.PropsWithChildren<{
-  courseSlide: number;
   tab: number;
   numberOfSlides: number;
   onIndexChange: (index: number) => void;
 }>) {
   return (
     <Swiper
-      showsButtons={true}
-      showsPagination={false}
+      showsButtons={false}
+      showsPagination={true}
       loadMinimal
       loadMinimalSize={numberOfSlides}
       buttonWrapperStyle={[
@@ -41,7 +39,6 @@ function CourseSwiper({
             paddingRight: 23,
             color: "#0000008A",
             fontSize: 16,
-            fontFamily: "Roboto-Regular",
           }}
         >
           {"Next"}
@@ -55,7 +52,6 @@ function CourseSwiper({
             paddingRight: 45,
             color: "#0000008A",
             fontSize: 16,
-            fontFamily: "Roboto-Regular",
           }}
         >
           {"Previous"}

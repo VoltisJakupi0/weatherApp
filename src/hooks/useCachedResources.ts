@@ -12,7 +12,6 @@ export default function useCachedResources() {
       try {
         SplashScreen.preventAutoHideAsync();
         Asset.loadAsync([
-          require("../../assets/images/cloudy.jpeg"),
           require("../../assets/images/sunnyday.jpeg"),
           require("../../assets/images/rainy.jpeg"),
           require("../../assets/images/clear.jpeg"),
@@ -23,6 +22,7 @@ export default function useCachedResources() {
           require("../../assets/images/starout.png"),
           require("../../assets/images/sunny.jpeg"),
           require("../../assets/images/back.png"),
+          require("../../assets/images/cloudy.jpeg"),
         ]);
         // Load fonts
       } catch (e) {

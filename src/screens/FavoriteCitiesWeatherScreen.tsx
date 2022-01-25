@@ -1,4 +1,10 @@
-import React, { ReactElement, useContext, useEffect, useState } from "react";
+import React, {
+  ReactElement,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   View,
   StyleSheet,
@@ -30,29 +36,49 @@ interface WeatherScreenProps {
 
 function FavoriteCitiesWeatherScreen({
   navigation,
-  route,
 }: WeatherScreenProps): ReactElement {
-  const weather = useSelector((state: ReducerTypes) => state.weather);
+  const weatherForecastForCityResponse = useSelector(
+    (state: ReducerTypes) => state.weather
+  );
   const dispatch = useDispatch();
-  const [location, setLocation] = useState<any>();
   const [favoriteCities, setFavoriteCities] = useState<any>([]);
   const [lat, setLat] = useState<any>();
   const [lon, setLon] = useState<any>();
-  const [, setCity] = useContext<any>(WeatherContext);
+  const [, setShowSwiper] = useContext<any>(WeatherContext);
+  const ref: any = useRef();
+
+  console.log(ref);
 
   useEffect(() => {
-    getUserLocation();
-    getFavoriteCities();
-  }, [route.params]);
+    loadData();
+    focusSubscription();
+  }, []);
 
   useEffect(() => {
     navigateToDetail();
-  }, [lat, lon, weather, dispatch]);
+  }, [lat, lon, weatherForecastForCityResponse, dispatch]);
+
+  useEffect(() => {
+    if (favoriteCities == []) {
+      getUserLocation();
+    }
+  }, [favoriteCities]);
+
+  const focusSubscription = () => {
+    const willFocusSubscription: any = navigation.addListener("focus", () => {
+      getFavoriteCities();
+      return willFocusSubscription;
+    });
+  };
+
+  const loadData = () => {
+    getFavoriteCities();
+  };
 
   const getUserLocation = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== "granted") {
-      // Alert.alert("Permission to access location was denied", "", []);
+      Alert.alert("Permission to access location was denied", "", []);
       return;
     }
     let locationPosition = await Location.getCurrentPositionAsync({});
@@ -62,13 +88,20 @@ function FavoriteCitiesWeatherScreen({
       longitude: locationPosition.coords.longitude,
     });
 
-    var city = address[0]?.city;
+    const isYourLocationInFavorite =
+      favoriteCities?.findIndex(
+        (item: any) => item.city == address?.[0].city
+      ) == -1
+        ? false
+        : true;
 
-    setCity(city);
-
-    const isYourLocationInFavorite = favoriteCities?.findIndex(
-      (item: any) => item.city == city
-    );
+    // console.log(
+    //   "isYourLocationInFavorite",
+    //   favoriteCities?.findIndex((item: any) => {
+    //     console.log(item.lat, locationPosition.coords.latitude);
+    //     item.latitude == locationPosition.coords.latitude.toFixed(2);
+    //   })
+    // );
 
     if (isYourLocationInFavorite) {
       return;
@@ -80,14 +113,18 @@ function FavoriteCitiesWeatherScreen({
         },
         {
           text: "OK",
-          onPress: () =>
-            getWeatherInformationForCity(
-              locationPosition.coords.latitude.toString(),
-              locationPosition.coords.longitude.toString()
-            ),
+          onPress: () => {
+            setLat(locationPosition.coords.latitude);
+            setLon(locationPosition.coords.longitude);
+            dispatch(
+              getWeatherInformationForCity(
+                locationPosition.coords.latitude.toString(),
+                locationPosition.coords.longitude.toString()
+              )
+            );
+          },
         },
       ]);
-      setLocation(location);
     }
   };
 
@@ -97,14 +134,16 @@ function FavoriteCitiesWeatherScreen({
   };
 
   const navigateToDetail = async () => {
-    if (weather?.current) {
+    if (weatherForecastForCityResponse?.current) {
       let address = await Location.reverseGeocodeAsync({
         latitude: parseFloat(lat),
         longitude: parseFloat(lon),
       });
-      weather.city = address[0]?.city;
-      setCity(weather.city);
-      navigation.navigate("InfoWeather", { weatherDetails: weather });
+      weatherForecastForCityResponse.city = address[0]?.city;
+      setShowSwiper(false);
+      navigation.navigate("InfoWeather", {
+        weatherDetails: weatherForecastForCityResponse,
+      });
     }
   };
 
@@ -117,6 +156,11 @@ function FavoriteCitiesWeatherScreen({
       </View>
       <ScrollView>
         <GeoDBCitiesSearch
+          ref={ref}
+          debounce={1000}
+          minLength={2}
+          autoFocus={false}
+          onChangeText={(value: string) => console.log("v")}
           placeholder="Search cities"
           onSelectItem={(data: any) => {
             setLat(data.latitude);
@@ -124,6 +168,7 @@ function FavoriteCitiesWeatherScreen({
             dispatch(
               getWeatherInformationForCity(data.latitude, data.longitude)
             );
+            ref.current.state.value = "";
           }}
           hidePoweredBy={true}
           query={{
@@ -160,6 +205,7 @@ function FavoriteCitiesWeatherScreen({
           <Text style={styles.emptyText}>No favorites cities yet...</Text>
         </View>
       )}
+      <View style={styles.topMarginView} />
     </View>
   );
 }
