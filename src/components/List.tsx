@@ -15,6 +15,17 @@ interface ListProps {
 function List({ data, navigation }: ListProps): any {
   const [, setCity] = useContext<any>(WeatherContext);
   return data?.map((item: any, key: number) => {
+    const mainWeather = item?.current?.weather[0]?.main;
+    const backgroundImage =
+      mainWeather == "Rainy"
+        ? require("../../assets/images/rainy.jpeg")
+        : mainWeather == "Snow"
+        ? require("../../assets/images/snow.jpeg")
+        : mainWeather == "Sunny"
+        ? require("../../assets/images/sunnyday.jpeg")
+        : mainWeather == "Clear"
+        ? require("../../assets/images/clear.jpeg")
+        : require("../../assets/images/cloudy.jpeg");
     return (
       <View key={key}>
         <ListItem
@@ -22,7 +33,7 @@ function List({ data, navigation }: ListProps): any {
             setCity(item?.city);
             navigation.navigate("InfoWeather", { weatherDetails: item });
           }}
-          background={require("../../assets/images/sunnyday.jpeg")}
+          background={backgroundImage}
           city={item?.city}
           temperature={Math.round(item.current?.temp).toString()}
         />

@@ -33,6 +33,24 @@ function DetailCityWeatherScreen({
   const [weatherDetails, setWeatherDetails] = useState<any>();
   const [city] = useContext<any>(WeatherContext);
 
+  const mainWeather = weatherDetails?.current?.weather[0].main;
+  const description = capitalize(
+    weatherDetails?.current?.weather[0].description
+  );
+  const temperature = Math.round(weatherDetails?.current?.temp);
+  const high = Math.round(weatherDetails?.daily[0]?.temp?.max);
+  const low = Math.round(weatherDetails?.daily[0]?.temp?.min);
+  const backgroundImage =
+    mainWeather == "Rainy"
+      ? require("../../assets/images/rainy.jpeg")
+      : mainWeather == "Snow"
+      ? require("../../assets/images/snow.jpeg")
+      : mainWeather == "Sunny"
+      ? require("../../assets/images/sunnyday.jpeg")
+      : mainWeather == "Clear"
+      ? require("../../assets/images/clear.jpeg")
+      : require("../../assets/images/cloudy.jpeg");
+
   useEffect(() => {
     if (route.params) {
       setWeatherDetails(route.params?.weatherDetails);
@@ -86,7 +104,8 @@ function DetailCityWeatherScreen({
     <View>
       <ImageBackground
         style={styles.imageWrapper}
-        source={require("../../assets/images/rainyinfo.jpeg")}
+        // source={require("../../assets/images/rainyinfo.jpeg")}
+        source={backgroundImage}
       >
         <View style={styles.headerView}>
           <TouchableOpacity onPress={handleBack}>
@@ -109,15 +128,10 @@ function DetailCityWeatherScreen({
         </View>
         <View style={styles.headingInfoView}>
           <Text style={styles.cityText}>{city}</Text>
-          <Text style={styles.weatherText}>
-            {capitalize(weatherDetails?.current?.weather[0].description)}
-          </Text>
-          <Text style={styles.temperatureText}>
-            {Math.round(weatherDetails?.current?.temp)}°
-          </Text>
+          <Text style={styles.weatherText}>{description}</Text>
+          <Text style={styles.temperatureText}>{temperature}°</Text>
           <Text style={styles.highLowInfo}>
-            HIGH: {Math.round(weatherDetails?.daily[0]?.temp?.max)}° LOW:{" "}
-            {Math.round(weatherDetails?.daily[0]?.temp?.min)}°
+            HIGH: {high}° LOW: {low}°
           </Text>
         </View>
 

@@ -28,29 +28,6 @@ interface WeatherScreenProps {
   route: any;
 }
 
-// const data: ListItemType[] = [
-//   {
-//     temperature: "2°C",
-//     background: require("../../assets/images/rainy.jpeg"),
-//     city: "Prishtina",
-//   },
-//   {
-//     temperature: "8°C",
-//     background: require("../../assets/images/sunnyday.jpeg"),
-//     city: "London",
-//   },
-//   {
-//     temperature: "-4°C",
-//     background: require("../../assets/images/snow.jpeg"),
-//     city: "Budapest",
-//   },
-//   {
-//     temperature: "12°C",
-//     background: require("../../assets/images/cloudy.jpeg"),
-//     city: "Tirana",
-//   },
-// ];
-
 function FavoriteCitiesWeatherScreen({
   navigation,
   route,
@@ -59,6 +36,8 @@ function FavoriteCitiesWeatherScreen({
   const dispatch = useDispatch();
   const [location, setLocation] = useState<any>();
   const [favoriteCities, setFavoriteCities] = useState<any>([]);
+  const [lat, setLat] = useState<any>();
+  const [lon, setLon] = useState<any>();
   const [, setCity] = useContext<any>(WeatherContext);
 
   useEffect(() => {
@@ -66,10 +45,14 @@ function FavoriteCitiesWeatherScreen({
     getFavoriteCities();
   }, [route.params]);
 
+  useEffect(() => {
+    navigateToDetail();
+  }, [lat, lon, weather, dispatch]);
+
   const getUserLocation = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== "granted") {
-      Alert.alert("Permission to access location was denied", "", []);
+      // Alert.alert("Permission to access location was denied", "", []);
       return;
     }
     let locationPosition = await Location.getCurrentPositionAsync({});
@@ -113,8 +96,7 @@ function FavoriteCitiesWeatherScreen({
     setFavoriteCities(JSON.parse(favoriteCities));
   };
 
-  const getWeatherInformation = async (lat: string, lon: string) => {
-    dispatch(getWeatherInformationForCity(lat, lon));
+  const navigateToDetail = async () => {
     if (weather?.current) {
       let address = await Location.reverseGeocodeAsync({
         latitude: parseFloat(lat),
@@ -136,9 +118,13 @@ function FavoriteCitiesWeatherScreen({
       <ScrollView>
         <GeoDBCitiesSearch
           placeholder="Search cities"
-          onSelectItem={(data: any) =>
-            getWeatherInformation(data.latitude, data.longitude)
-          }
+          onSelectItem={(data: any) => {
+            setLat(data.latitude);
+            setLon(data.longitude);
+            dispatch(
+              getWeatherInformationForCity(data.latitude, data.longitude)
+            );
+          }}
           hidePoweredBy={true}
           query={{
             key: geoApiKey,
