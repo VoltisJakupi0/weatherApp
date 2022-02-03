@@ -19,8 +19,9 @@ import {
   NavigationScreenProp,
   NavigationState,
 } from "react-navigation";
+import NetInfo, { useNetInfo } from "@react-native-community/netinfo";
 import List from "../components/List";
-import { geoApiKey } from "../constants/apiKey";
+import { APIkey, geoApiKey } from "../constants/apiKey";
 import GeoDBCitiesSearch from "react-native-geodb";
 import * as Location from "expo-location";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -34,6 +35,14 @@ interface WeatherScreenProps {
   route: any;
 }
 
+export const checkConnected = () => {
+  return NetInfo.fetch().then((state) => {
+    console.log("Connection type", state.type);
+    console.log("Is connected?", state.isConnected);
+    return state.isConnected;
+  });
+};
+
 function FavoriteCitiesWeatherScreen({
   navigation,
 }: WeatherScreenProps): ReactElement {
@@ -46,23 +55,17 @@ function FavoriteCitiesWeatherScreen({
   const [lon, setLon] = useState<any>();
   const [, setShowSwiper] = useContext<any>(WeatherContext);
   const ref: any = useRef();
-
-  console.log(ref);
+  const netInfo = useNetInfo();
 
   useEffect(() => {
     loadData();
+    getUserLocation();
     focusSubscription();
   }, []);
 
   useEffect(() => {
     navigateToDetail();
   }, [lat, lon, weatherForecastForCityResponse, dispatch]);
-
-  useEffect(() => {
-    if (favoriteCities == []) {
-      getUserLocation();
-    }
-  }, [favoriteCities]);
 
   const focusSubscription = () => {
     const willFocusSubscription: any = navigation.addListener("focus", () => {
@@ -83,37 +86,28 @@ function FavoriteCitiesWeatherScreen({
     }
     let locationPosition = await Location.getCurrentPositionAsync({});
 
-    let address = await Location.reverseGeocodeAsync({
-      latitude: locationPosition.coords.latitude,
-      longitude: locationPosition.coords.longitude,
-    });
+    const showedLocationPopUp = await AsyncStorage.getItem(
+      "showedLocationPopUp"
+    );
 
-    const isYourLocationInFavorite =
-      favoriteCities?.findIndex(
-        (item: any) => item.city == address?.[0].city
-      ) == -1
-        ? false
-        : true;
+    if (showedLocationPopUp == undefined) {
+      await AsyncStorage.setItem("showedLocationPopUp", "");
+    }
 
-    // console.log(
-    //   "isYourLocationInFavorite",
-    //   favoriteCities?.findIndex((item: any) => {
-    //     console.log(item.lat, locationPosition.coords.latitude);
-    //     item.latitude == locationPosition.coords.latitude.toFixed(2);
-    //   })
-    // );
-
-    if (isYourLocationInFavorite) {
+    if (showedLocationPopUp == "true") {
       return;
     } else {
       Alert.alert("Do you wanna see the weather for your location?", "", [
         {
           text: "Cancel",
           style: "cancel",
+          onPress: async () => {
+            await AsyncStorage.setItem("showedLocationPopUp", "true");
+          },
         },
         {
           text: "OK",
-          onPress: () => {
+          onPress: async () => {
             setLat(locationPosition.coords.latitude);
             setLon(locationPosition.coords.longitude);
             dispatch(
@@ -122,6 +116,7 @@ function FavoriteCitiesWeatherScreen({
                 locationPosition.coords.longitude.toString()
               )
             );
+            await AsyncStorage.setItem("showedLocationPopUp", "true");
           },
         },
       ]);
@@ -129,8 +124,42 @@ function FavoriteCitiesWeatherScreen({
   };
 
   const getFavoriteCities = async () => {
-    const favoriteCities: any = await AsyncStorage.getItem("favoriteCities");
-    setFavoriteCities(JSON.parse(favoriteCities));
+    const favoriteCitiesFromStorage: any = await AsyncStorage.getItem(
+      "favoriteCities"
+    );
+
+    const arr: any[] = [];
+
+    if (JSON.parse(favoriteCitiesFromStorage)?.length > 0) {
+      if ((await checkConnected()) == true) {
+        for (let x in JSON.parse(favoriteCitiesFromStorage)) {
+          const success = await fetch(
+            `https://api.openweathermap.org/data/2.5/onecall?lat=${
+              JSON.parse(favoriteCitiesFromStorage)[x]?.lat
+            }&lon=${
+              JSON.parse(favoriteCitiesFromStorage)[x]?.lon
+            }&units=metric&exclude=minutely,hourly,alerts&appid=${APIkey}`
+          );
+
+          const response = await success.json();
+
+          let address = await Location.reverseGeocodeAsync({
+            latitude: parseFloat(JSON.parse(favoriteCitiesFromStorage)[x].lat),
+            longitude: parseFloat(JSON.parse(favoriteCitiesFromStorage)[x].lon),
+          });
+
+          response.city = address[0]?.city;
+
+          arr.push(response);
+        }
+
+        setFavoriteCities(arr);
+
+        await AsyncStorage.setItem("favoriteCities", JSON.stringify(arr));
+      }
+    } else {
+      setFavoriteCities(JSON.parse(favoriteCitiesFromStorage));
+    }
   };
 
   const navigateToDetail = async () => {
@@ -160,7 +189,6 @@ function FavoriteCitiesWeatherScreen({
           debounce={1000}
           minLength={2}
           autoFocus={false}
-          onChangeText={(value: string) => console.log("v")}
           placeholder="Search cities"
           onSelectItem={(data: any) => {
             setLat(data.latitude);
@@ -194,6 +222,7 @@ function FavoriteCitiesWeatherScreen({
           <Text style={styles.favoriteCityText}>Your favorite cities</Text>
           <ScrollView>
             <List navigation={navigation} data={favoriteCities} />
+            <View style={styles.bottomMargin} />
           </ScrollView>
         </>
       ) : (
@@ -269,6 +298,7 @@ const styles = StyleSheet.create({
     paddingRight: 10,
     color: "grey",
   },
+  bottomMargin: { marginBottom: 100, marginTop: 100 },
 });
 
 export default FavoriteCitiesWeatherScreen;

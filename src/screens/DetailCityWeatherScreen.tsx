@@ -70,7 +70,9 @@ function DetailCityWeatherScreen({
       );
     }
 
-    var arr: any = JSON.parse(favoriteCities);
+    console.log(favoriteCities);
+
+    var arr: any = JSON?.parse(favoriteCities);
 
     if (favorite) {
       const result = arr?.filter((x: any) => x.city !== weatherDetails.city);

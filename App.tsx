@@ -8,6 +8,7 @@ import allReducers from "./src/reducers";
 import MainNavigator from "./src/navigation/MainNavigator";
 import WeatherContextWrapper from "./src/context/WeatherContextWrapper";
 import useCachedResources from "./src/hooks/useCachedResources";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const store = createStore(allReducers, applyMiddleware(thunk));
 export default function App() {
@@ -16,6 +17,12 @@ export default function App() {
   if (!isLoadingComplete) {
     return null;
   }
+
+  // const setItem = async () => {
+  //   await AsyncStorage.setItem("favoriteCities", "[]");
+  // };
+
+  // setItem();
 
   return (
     <WeatherContextWrapper>

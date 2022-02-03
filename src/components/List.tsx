@@ -26,6 +26,8 @@ function List({ data, navigation }: ListProps): any {
         : mainWeather == "Clear"
         ? require("../../assets/images/clear.jpeg")
         : require("../../assets/images/cloudy.jpeg");
+
+    console.log("item", item);
     return (
       <View key={key}>
         <ListItem
