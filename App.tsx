@@ -18,11 +18,11 @@ export default function App() {
     return null;
   }
 
-  // const setItem = async () => {
-  //   await AsyncStorage.setItem("favoriteCities", "[]");
-  // };
+  const setItem = async () => {
+    await AsyncStorage.setItem("showedLocationPopUp", "[]");
+  };
 
-  // setItem();
+  setItem();
 
   return (
     <WeatherContextWrapper>

@@ -19,7 +19,7 @@ import {
   NavigationScreenProp,
   NavigationState,
 } from "react-navigation";
-import NetInfo, { useNetInfo } from "@react-native-community/netinfo";
+import NetInfo from "@react-native-community/netinfo";
 import List from "../components/List";
 import { APIkey, geoApiKey } from "../constants/apiKey";
 import GeoDBCitiesSearch from "react-native-geodb";
@@ -55,7 +55,6 @@ function FavoriteCitiesWeatherScreen({
   const [lon, setLon] = useState<any>();
   const [, setShowSwiper] = useContext<any>(WeatherContext);
   const ref: any = useRef();
-  const netInfo = useNetInfo();
 
   useEffect(() => {
     loadData();
